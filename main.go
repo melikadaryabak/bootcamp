@@ -6,17 +6,53 @@ import (
     "net/http"
 )
 
+type Category struct{
+    ID int `json:"id"`
+    Name string `json:"name"`
+}
+var Categories = []Category{
+    {ID: 1, Name:"web"},
+    {ID: 2, Name:"windows"},
+    {ID: 3, Name: "android"},
+}
+
 type Bootcamp struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
+    Description string `json:"description"`
+    Category Category `json:"category"`
 }
 
 var bootcamps = []Bootcamp{
-	{ID: 1, Name: "Go Bootcamp"},
-	{ID: 2, Name: "PHP Bootcamp"},
+	{
+        ID: 1,
+        Name: "Go Bootcamp",   
+        Description: "This bootcamp teaches the fundamentals of Go programming, covering goroutines, channels, and building web APIs.",
+        Category: Categories[0],
+        },
+
+	{
+        ID: 2,
+        Name: "PHP Bootcamp",
+        Description: "A complete PHP development course focusing on server-side scripting, working with databases, and building dynamic websites.",
+        Category: Categories[0],
+        },
+        {
+            ID:          3,
+            Name:        "Android Bootcamp",
+            Description: "Learn to build modern Android apps using Java and Kotlin, including UI design, data storage, and integration with RESTful APIs.",
+            Category:    Categories[2],
+        },
+        {
+            ID:         4,
+            Name:        "c++ Bootcamp",
+            Description: "Learn to build modern Android apps using Java and Kotlin, including UI design, data storage, and integration with RESTful APIs.",
+            Category:    Categories[1],
+        },
 }
 
 func main() {
+    http.Handle("/", http.FileServer(http.Dir("./static")))
     //1
     http.HandleFunc("/hello", helloHandler)
     //2
