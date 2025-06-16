@@ -4,6 +4,7 @@ import (
     "encoding/json"
     "log"
     "net/http"
+    "strconv"
 )
 
 type Category struct{
@@ -53,10 +54,20 @@ var bootcamps = []Bootcamp{
 
 func main() {
     http.Handle("/", http.FileServer(http.Dir("./static")))
-    //1
     http.HandleFunc("/hello", helloHandler)
-    //2
-    http.HandleFunc("/bootcamps", bootcampsHandler)
+    http.HandleFunc("/bootcamps", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+        case http.MethodGet :
+                bootcampsHandler(w, r)
+            case http.MethodPost :
+                newbootcampsHandler(w, r)
+            case http.MethodDelete :
+                deletebootcampsHandler(w, r)
+            default:
+                http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+        }
+	})
+
     // Start the server on port 8080
     log.Println("Server listening on http://localhost:8080")
     if err := http.ListenAndServe(":8080", nil); err != nil {
@@ -105,3 +116,73 @@ func bootcampsHandler(w http.ResponseWriter, r *http.Request) {
         log.Printf("Error encoding response: %v", err)
     }
 }
+func newbootcampsHandler(w http.ResponseWriter, r *http.Request) {
+    // 
+    if r.Method != http.MethodPost {
+        http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+        return
+    }
+    var newBootcamp Bootcamp
+    decoder := json.NewDecoder(r.Body)
+    if err := decoder.Decode(&newBootcamp); err != nil {
+        http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
+        return
+    }
+    
+    newBootcamp.ID = len(bootcamps) + 1
+    bootcamps = append(bootcamps, newBootcamp)
+
+    // Set JSON header
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+
+
+    // Encode payload to JSON
+    if err := json.NewEncoder(w).Encode(newBootcamp); err != nil {
+        log.Printf("Error encoding response: %v", err)
+    }
+}
+func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
+    // 
+    if r.Method != http.MethodDelete {
+        http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+        return
+    }
+        // گرفتن ID از QueryString
+        idStr := r.URL.Query().Get("id")
+        if idStr == "" {
+            http.Error(w, `{"error": "ID is required"}`, http.StatusBadRequest)
+            return
+        }
+    
+        id, err := strconv.Atoi(idStr)
+        if err != nil {
+            http.Error(w, `{"error": "Invalid ID"}`, http.StatusBadRequest)
+            return
+        }
+    
+        // حذف bootcamp از آرایه
+        found := false
+        for i, b := range bootcamps {
+            if b.ID == id {
+                bootcamps = append(bootcamps[:i], bootcamps[i+1:]...)
+                found = true
+                break
+            }
+        }
+    
+        if !found {
+            http.Error(w, `{"error": "Bootcamp not found"}`, http.StatusNotFound)
+            return
+        }
+    
+        // Set JSON header
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+
+        if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp deleted successfully"}); err != nil {
+            log.Printf("Error encoding response: %v", err)
+        }
+        
+    }
+    

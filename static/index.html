@@ -2,19 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bootcamps from Go API</title>
+  <title>Bootcamps</title>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #0f0f0f;
-      color: #e0e0e0;
+      background-color: #f4f4f4;
+      color: #333;
       font-family: 'Fira Code', monospace;
       padding: 40px;
     }
     h1 {
-      color: #3CFA6C;
+      color: #007acc;
       text-align: center;
       margin-bottom: 40px;
+    }
+    form {
+      max-width: 500px;
+      margin: 0 auto 40px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: inherit;
+    }
+    button {
+      background-color: #5cb85c;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button.delete {
+      background-color: #d9534f;
+      float: right;
     }
     .container {
       display: grid;
@@ -22,23 +51,17 @@
       gap: 25px;
     }
     .card {
-      background: #1a1a1a;
-      border-left: 4px solid #3CFA6C;
+      background: #ffffff;
+      border-left: 5px solid #007acc;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 20px #3CFA6C22;
-    }
-    .card h2 {
-      color: #3CFA6C;
-      margin-bottom: 10px;
-    }
-    .card p {
-      color: #ccc;
+      box-shadow: 0 0 10px #bbb;
+      position: relative;
     }
     .category {
       display: block;
       margin-top: 15px;
-      color: #999;
+      color: #777;
       font-size: 0.85rem;
       font-style: italic;
     }
@@ -47,29 +70,101 @@
 <body>
 
 <h1>Bootcamps</h1>
+
+<form id="bootcamp-form">
+  <input type="text" id="name" placeholder="Bootcamp Name" required />
+  <textarea id="description" placeholder="Description" required></textarea>
+  <select id="category" required>
+    <option value="">-- Select Category --</option>
+    <option value="1">Web</option>
+    <option value="2">Windows</option>
+    <option value="3">Android</option>
+  </select>
+  <button type="submit">Add Bootcamp</button>
+</form>
+
 <div class="container" id="bootcamps-container"></div>
 
 <script>
-  fetch("/bootcamps")
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById('bootcamps-container');
-      data.bootcamps.forEach(b => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <h2>${b.name}</h2>
-          <p>${b.description}</p>
-          <span class="category">Category: ${b.category.name}</span>
-        `;
-        container.appendChild(card);
+  const form = document.getElementById('bootcamp-form');
+  const container = document.getElementById('bootcamps-container');
+
+  function loadBootcamps() {
+    fetch('/bootcamps')
+      .then(res => res.json())
+      .then(data => {
+        container.innerHTML = '';
+        data.bootcamps.forEach(b => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h2>${b.name}</h2>
+            <p>${b.description}</p>
+            <span class="category">Category: ${b.category.name}</span>
+            <button class="delete" onclick="deleteBootcamp(${b.id})">Delete</button>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(err => {
+        container.innerHTML = "<p style='color:red;'>❌ Error loading bootcamps</p>";
+        console.error(err);
       });
+  }
+
+  function deleteBootcamp(id) {
+    fetch(`/bootcamps?id=${id}`, {
+      method: 'DELETE'
+    })
+    .then(res => {
+      if (res.ok) {
+        loadBootcamps();
+      } else {
+        alert("❌ Error deleting bootcamp");
+      }
+    });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const categoryId = parseInt(document.getElementById('category').value);
+
+    if (!name || !description || !categoryId) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const newBootcamp = {
+      name,
+      description,
+      category: {
+        id: categoryId
+      }
+    };
+
+    fetch('/bootcamps', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newBootcamp)
+    })
+    .then(res => res.json())
+    .then(() => {
+      form.reset();
+      loadBootcamps();
     })
     .catch(err => {
-      document.getElementById('bootcamps-container').innerHTML =
-        "<p style='color:red;'>❌ خطا در دریافت داده‌ها از سرور</p>";
       console.error(err);
+      alert("❌ Error adding bootcamp");
     });
+  });
+
+  // Initial load
+  loadBootcamps();
 </script>
 
 </body>
