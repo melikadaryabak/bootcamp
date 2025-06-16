@@ -117,7 +117,7 @@ func bootcampsHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 func newbootcampsHandler(w http.ResponseWriter, r *http.Request) {
-    // 
+
     if r.Method != http.MethodPost {
         http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
         return
@@ -143,12 +143,12 @@ func newbootcampsHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
-    // 
+    
     if r.Method != http.MethodDelete {
         http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
         return
     }
-        // گرفتن ID از QueryString
+        
         idStr := r.URL.Query().Get("id")
         if idStr == "" {
             http.Error(w, `{"error": "ID is required"}`, http.StatusBadRequest)
@@ -161,7 +161,7 @@ func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
             return
         }
     
-        // حذف bootcamp از آرایه
+        
         found := false
         for i, b := range bootcamps {
             if b.ID == id {
