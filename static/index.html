@@ -1,171 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Bootcamps</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f4f4f4;
-      color: #333;
-      font-family: 'Fira Code', monospace;
-      padding: 40px;
-    }
-    h1 {
-      color: #007acc;
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    form {
-      max-width: 500px;
-      margin: 0 auto 40px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px #ccc;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-family: inherit;
-    }
-    button {
-      background-color: #5cb85c;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button.delete {
-      background-color: #d9534f;
-      float: right;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-    }
-    .card {
-      background: #ffffff;
-      border-left: 5px solid #007acc;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #bbb;
-      position: relative;
-    }
-    .category {
-      display: block;
-      margin-top: 15px;
-      color: #777;
-      font-size: 0.85rem;
-      font-style: italic;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Bootcamps</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .bootcamp {
+            background: white;
+            padding: 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .bootcamp h3 {
+            margin-top: 0;
+        }
+        .actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .actions button {
+            margin-left: 5px;
+        }
+        #addForm {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Bootcamps</h1>
 
-<h1>Bootcamps</h1>
+        <div id="addForm">
+            <h3>Add New Bootcamp</h3>
+            <input type="text" id="name" placeholder="Bootcamp Name">
+            <textarea id="description" placeholder="Description"></textarea>
+            <select id="category">
+                <option value="1">web</option>
+                <option value="2">windows</option>
+                <option value="3">android</option>
+            </select>
+            <button onclick="addBootcamp()">Add</button>
+        </div>
 
-<form id="bootcamp-form">
-  <input type="text" id="name" placeholder="Bootcamp Name" required />
-  <textarea id="description" placeholder="Description" required></textarea>
-  <select id="category" required>
-    <option value="">-- Select Category --</option>
-    <option value="1">Web</option>
-    <option value="2">Windows</option>
-    <option value="3">Android</option>
-  </select>
-  <button type="submit">Add Bootcamp</button>
-</form>
+        <div id="bootcampList"></div>
+    </div>
 
-<div class="container" id="bootcamps-container"></div>
+    <!-- Edit Modal -->
+    <div id="editModal" style="display:none; position:fixed; top:20%; left:30%; width:40%; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.5); z-index:999;">
+        <h3>Edit Bootcamp</h3>
+        <input type="hidden" id="editId">
+        <input type="text" id="editName" placeholder="Bootcamp Name">
+        <textarea id="editDescription" placeholder="Description"></textarea>
+        <select id="editCategory">
+            <option value="1">web</option>
+            <option value="2">windows</option>
+            <option value="3">android</option>
+        </select>
+        <button onclick="saveEdit()">Save</button>
+        <button onclick="closeModal()">Cancel</button>
+    </div>
 
-<script>
-  const form = document.getElementById('bootcamp-form');
-  const container = document.getElementById('bootcamps-container');
+    <script>
+        async function fetchBootcamps() {
+            const res = await fetch('/bootcamps');
+            const data = await res.json();
+            const list = document.getElementById('bootcampList');
+            list.innerHTML = '';
 
-  function loadBootcamps() {
-    fetch('/bootcamps')
-      .then(res => res.json())
-      .then(data => {
-        container.innerHTML = '';
-        data.bootcamps.forEach(b => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <h2>${b.name}</h2>
-            <p>${b.description}</p>
-            <span class="category">Category: ${b.category.name}</span>
-            <button class="delete" onclick="deleteBootcamp(${b.id})">Delete</button>
-          `;
-          container.appendChild(card);
-        });
-      })
-      .catch(err => {
-        container.innerHTML = "<p style='color:red;'>❌ Error loading bootcamps</p>";
-        console.error(err);
-      });
-  }
+            data.bootcamps.forEach(b => {
+                const div = document.createElement('div');
+                div.className = 'bootcamp';
+                div.innerHTML = `
+                    <h3>${b.name}</h3>
+                    <p>${b.description}</p>
+                    <p><strong>Category:</strong> ${b.category.name}</p>
+                    <div class="actions">
+                        <button onclick="editBootcamp(${b.id}, '${b.name}', '${b.description}', ${b.category.id})">Edit</button>
+                        <button onclick="deleteBootcamp(${b.id})">Delete</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
 
-  function deleteBootcamp(id) {
-    fetch(`/bootcamps?id=${id}`, {
-      method: 'DELETE'
-    })
-    .then(res => {
-      if (res.ok) {
-        loadBootcamps();
-      } else {
-        alert("❌ Error deleting bootcamp");
-      }
-    });
-  }
+        async function addBootcamp() {
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const categoryID = parseInt(document.getElementById('category').value);
+            const categoryName = document.getElementById('category').options[document.getElementById('category').selectedIndex].text;
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+            const newBootcamp = {
+                id: 0, 
+                name,
+                description,
+                category: {
+                    id: categoryID,
+                    name: categoryName
+                }
+            };
 
-    const name = document.getElementById('name').value.trim();
-    const description = document.getElementById('description').value.trim();
-    const categoryId = parseInt(document.getElementById('category').value);
+            await fetch('/bootcamps', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(newBootcamp)
+            });
 
-    if (!name || !description || !categoryId) {
-      alert("Please fill in all fields.");
-      return;
-    }
+            fetchBootcamps();
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+        }
 
-    const newBootcamp = {
-      name,
-      description,
-      category: {
-        id: categoryId
-      }
-    };
+        async function deleteBootcamp(id) {
+            await fetch(`/bootcamps?id=${id}`, {
+                method: 'DELETE'
+            });
+            fetchBootcamps();
+        }
 
-    fetch('/bootcamps', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newBootcamp)
-    })
-    .then(res => res.json())
-    .then(() => {
-      form.reset();
-      loadBootcamps();
-    })
-    .catch(err => {
-      console.error(err);
-      alert("❌ Error adding bootcamp");
-    });
-  });
+        function editBootcamp(id, name, description, categoryID) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editDescription').value = description;
+            document.getElementById('editCategory').value = categoryID;
+            document.getElementById('editModal').style.display = 'block';
+        }
 
-  // Initial load
-  loadBootcamps();
-</script>
+        async function saveEdit() {
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('editName').value;
+            const description = document.getElementById('editDescription').value;
+            const categoryID = parseInt(document.getElementById('editCategory').value);
+            const categoryName = document.getElementById('editCategory').options[document.getElementById('editCategory').selectedIndex].text;
 
+            const updatedBootcamp = {
+                id: parseInt(id),
+                name,
+                description,
+                category: {
+                    id: categoryID,
+                    name: categoryName
+                }
+            };
+
+            await fetch(`/bootcamps?id=${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(updatedBootcamp)
+            });
+
+            closeModal();
+            fetchBootcamps();
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Initial load
+        fetchBootcamps();
+    </script>
 </body>
 </html>

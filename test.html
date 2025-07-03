@@ -2,82 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bootcamps from Go API</title>
+  <title>Bootcamps</title>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #f5f5f5;
+      background-color: #f4f4f4;
       color: #333;
       font-family: 'Fira Code', monospace;
       padding: 40px;
     }
-
     h1 {
-      color: #3CFA6C;
+      color: #007acc;
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
-
     form {
-      max-width: 600px;
-      margin: 0 auto 50px;
-      background: #fff;
+      max-width: 500px;
+      margin: 0 auto 40px auto;
       padding: 20px;
-      border-radius: 10px;
+      background: #fff;
+      border-radius: 8px;
       box-shadow: 0 0 10px #ccc;
     }
-
-    form input, form textarea, form select, form button {
-      display: block;
+    input, textarea, select {
       width: 100%;
-      margin-bottom: 15px;
-      padding: 10px;
-      font-family: inherit;
-      font-size: 1rem;
+      padding: 8px;
+      margin: 8px 0 16px;
       border: 1px solid #ccc;
       border-radius: 5px;
+      font-family: inherit;
     }
-
-    form button {
-      background-color: #6cfac2;
-      color: #000;
+    button {
+      background-color: #5cb85c;
+      color: white;
+      padding: 10px 20px;
       border: none;
-      font-weight: bold;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      font-weight: bold;
     }
-
-    form button:hover {
-      background-color: #3CFA6C;
+    button.delete {
+      background-color: #d9534f;
+      float: right;
     }
-
     .container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 25px;
     }
-
     .card {
-      background: #fff;
-      border-left: 4px solid #6cfac2;
+      background: #ffffff;
+      border-left: 5px solid #007acc;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px #ddd;
+      box-shadow: 0 0 10px #bbb;
+      position: relative;
     }
-
-    .card h2 {
-      color: #2b7a78;
-      margin-bottom: 10px;
-    }
-
-    .card p {
-      color: #555;
-    }
-
     .category {
       display: block;
       margin-top: 15px;
-      color: #999;
+      color: #777;
       font-size: 0.85rem;
       font-style: italic;
     }
@@ -87,15 +71,14 @@
 
 <h1>Bootcamps</h1>
 
-<!-- Form to add new Bootcamp -->
 <form id="bootcamp-form">
   <input type="text" id="name" placeholder="Bootcamp Name" required />
-  <textarea id="description" placeholder="Bootcamp Description" required></textarea>
-  <select id="category-id" required>
-    <option value="">Select Category</option>
-    <option value="1">web</option>
-    <option value="2">windows</option>
-    <option value="3">android</option>
+  <textarea id="description" placeholder="Description" required></textarea>
+  <select id="category" required>
+    <option value="">-- Select Category --</option>
+    <option value="1">Web</option>
+    <option value="2">Windows</option>
+    <option value="3">Android</option>
   </select>
   <button type="submit">Add Bootcamp</button>
 </form>
@@ -103,12 +86,11 @@
 <div class="container" id="bootcamps-container"></div>
 
 <script>
-  const container = document.getElementById('bootcamps-container');
   const form = document.getElementById('bootcamp-form');
+  const container = document.getElementById('bootcamps-container');
 
-  // Load existing bootcamps
   function loadBootcamps() {
-    fetch("/bootcamps")
+    fetch('/bootcamps')
       .then(res => res.json())
       .then(data => {
         container.innerHTML = '';
@@ -119,49 +101,70 @@
             <h2>${b.name}</h2>
             <p>${b.description}</p>
             <span class="category">Category: ${b.category.name}</span>
+            <button class="delete" onclick="deleteBootcamp(${b.id})">Delete</button>
           `;
           container.appendChild(card);
         });
       })
       .catch(err => {
-        container.innerHTML = "<p style='color:red;'>❌ خطا در دریافت داده‌ها از سرور</p>";
+        container.innerHTML = "<p style='color:red;'>❌ Error loading bootcamps</p>";
         console.error(err);
       });
   }
 
-  loadBootcamps();
+  function deleteBootcamp(id) {
+    fetch(`/bootcamps?id=${id}`, {
+      method: 'DELETE'
+    })
+    .then(res => {
+      if (res.ok) {
+        loadBootcamps();
+      } else {
+        alert("❌ Error deleting bootcamp");
+      }
+    });
+  }
 
-  // Handle form submission
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    const name = document.getElementById('name').value;
-    const description = document.getElementById('description').value;
-    const categoryId = parseInt(document.getElementById('category-id').value);
+
+    const name = document.getElementById('name').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const categoryId = parseInt(document.getElementById('category').value);
+
+    if (!name || !description || !categoryId) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
     const newBootcamp = {
       name,
       description,
       category: {
-        id: categoryId,
-        name: document.getElementById('category-id').selectedOptions[0].text
+        id: categoryId
       }
     };
 
-    fetch("/bootcamps", {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
+    fetch('/bootcamps', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(newBootcamp)
     })
-      .then(res => res.json())
-      .then(added => {
-        form.reset();
-        loadBootcamps(); // Reload the list
-      })
-      .catch(err => {
-        alert("❌ خطا در ارسال اطلاعات");
-        console.error(err);
-      });
+    .then(res => res.json())
+    .then(() => {
+      form.reset();
+      loadBootcamps();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("❌ Error adding bootcamp");
+    });
   });
+
+  // Initial load
+  loadBootcamps();
 </script>
 
 </body>
