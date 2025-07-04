@@ -57,8 +57,8 @@ func main() {
                 newbootcampsHandler(w, r)
             case http.MethodDelete :
                 deletebootcampsHandler(w, r)
-            // case http.MethodPut :
-            //     editbootcampsHandler(w, r)
+            case http.MethodPut :
+                editbootcampsHandler(w, r)
             default:
                 http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
         }
@@ -188,7 +188,6 @@ func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     
-// Convert 'id' from string to int
     id, err := strconv.Atoi(idStr)
     if err != nil {
         http.Error(w, `{"error": "Invalid ID"}`, http.StatusBadRequest)
@@ -226,52 +225,63 @@ func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
     }
 
 
-//     func editbootcampsHandler(w http.ResponseWriter, r *http.Request) {
+func editbootcampsHandler(w http.ResponseWriter, r *http.Request) {
     
-//         if r.Method != http.MethodPut {
-//             http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-//             return
-//         }
+            // Only allow Put requests
+            if r.Method != http.MethodPut {
+                http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+                return
+            }
+                
+              // Extract 'id' from URL query parameters
+                idStr := r.URL.Query().Get("id")
+                if idStr == "" {
+                    http.Error(w, `{"error": "ID is required"}`, http.StatusBadRequest)
+                    return
+                }
             
-//             idStr := r.URL.Query().Get("id")
-//             if idStr == "" {
-//                 http.Error(w, `{"error": "ID is required"}`, http.StatusBadRequest)
-//                 return
-//             }
-        
-//             id, err := strconv.Atoi(idStr)
-//             if err != nil {
-//                 http.Error(w, `{"error": "Invalid ID"}`, http.StatusBadRequest)
-//                 return
-//             }
+                // Convert 'id' from string to int
+                id, err := strconv.Atoi(idStr)
+                if err != nil {
+                    http.Error(w, `{"error": "Invalid ID"}`, http.StatusBadRequest)
+                    return
+                }
+    
+      // Decode request body into Bootcamp struct
+       var update Bootcamp
+        decoder := json.NewDecoder(r.Body)
+        if err := decoder.Decode(&update); err != nil {
+            http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
+            return
+        }
+    
+      // update bootcamp in the database
+    result, err := db.Exec(`UPDATE bootcamp SET name = ?, description = ?, category_id = ? WHERE id = ?`,
+    update.Name, update.Description, update.Category.ID, id)
+if err != nil {
+    http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
+    log.Printf("DB update error: %v", err)
+    return
+}
 
-//             var update Bootcamp
-//     decoder := json.NewDecoder(r.Body)
-//     if err := decoder.Decode(&update); err != nil {
-//         http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
-//         return
-//     }
-
-//     found := false
-//     for i, b := range bootcamps {
-//         if b.ID == id {
-//             bootcamps[i] = update
-//             found = true
-//             break
-//         }
-//     }
-
-//     if !found {
-//         http.Error(w, `{"error": "Bootcamp not found"}`, http.StatusNotFound)
-//         return
-//     }
-
-//     // Set JSON header
-//     w.Header().Set("Content-Type", "application/json")
-//     w.WriteHeader(http.StatusOK)
-
- // //Encode updated bootcamp to JSON
-//     if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp edit successfully"}); err != nil {
-//         log.Printf("Error encoding response: %v", err)
-//     }
-//         }
+// Check edit result and handle not found bootcamp
+rowsAffected, err := result.RowsAffected()
+if err != nil {
+    http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
+    log.Printf("DB rows affected error: %v", err)
+    return
+}
+if rowsAffected == 0 {
+    http.Error(w, `{"error": "Bootcamp not found"}`, http.StatusNotFound)
+    return
+}
+    
+        // Set JSON header
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+    
+        //Encode updated bootcamp to JSON
+        if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp edit successfully"}); err != nil {
+            log.Printf("Error encoding response: %v", err)
+        }
+      }
