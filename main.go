@@ -37,13 +37,13 @@ func main() {
     // Connect to MySQL
     db, err = sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/amacodecamp")
 
-    // if err != nil {
-    //     log.Fatalf("خطا در باز کردن اتصال به دیتابیس: %v", err)
-    // }
-
-    // if err = db.Ping(); err != nil {
-    //     log.Fatalf("خطا در ارتباط با دیتابیس (Ping): %v", err)
-    // }
+    // Check database connection
+    if err != nil {
+        log.Fatalf("Error opening database connection: %v", err)
+    }
+    if err = db.Ping(); err != nil {
+        log.Fatalf("Error pinging database: %v", err)
+    }
     
    // Static file handler
     http.Handle("/", http.FileServer(http.Dir("./static")))
@@ -167,7 +167,7 @@ func newbootcampsHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusOK)
 
-    // Encode newbootcamp to JSON
+    // Encode new bootcamp to JSON
     if err := json.NewEncoder(w).Encode(newBootcamp); err != nil {
         log.Printf("Error encoding response: %v", err)
     }
@@ -195,19 +195,20 @@ func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     
-        
+    // Delete bootcamp by id  
     result, err := db.Exec("DELETE FROM bootcamp WHERE id = ?", id)
     if err != nil {
         http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
         log.Printf("Delete error: %v", err)
         return
     }
+    
+    // Check delete result and handle not found bootcamp
     rowsAffected, err := result.RowsAffected()
     if err != nil {
         http.Error(w, `{"error": "Could not determine result"}`, http.StatusInternalServerError)
         return
     }
-
     if rowsAffected == 0 {
         http.Error(w, `{"error": "Bootcamp not found"}`, http.StatusNotFound)
         return
@@ -217,6 +218,7 @@ func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
 
+       // Send success response after deletion
         if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp deleted successfully"}); err != nil {
             log.Printf("Error encoding response: %v", err)
         }
@@ -268,6 +270,7 @@ func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
 //     w.Header().Set("Content-Type", "application/json")
 //     w.WriteHeader(http.StatusOK)
 
+ // //Encode updated bootcamp to JSON
 //     if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp edit successfully"}); err != nil {
 //         log.Printf("Error encoding response: %v", err)
 //     }
