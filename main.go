@@ -4,7 +4,7 @@ import (
     "encoding/json"
     "log"
     "net/http"
-    // "strconv"
+    "strconv"
     "database/sql"
     _ "github.com/go-sql-driver/mysql"
 )
@@ -55,8 +55,8 @@ func main() {
                 bootcampsHandler(w, r)
             case http.MethodPost :
                 newbootcampsHandler(w, r)
-            // case http.MethodDelete :
-            //     deletebootcampsHandler(w, r)
+            case http.MethodDelete :
+                deletebootcampsHandler(w, r)
             // case http.MethodPut :
             //     editbootcampsHandler(w, r)
             default:
@@ -173,52 +173,59 @@ func newbootcampsHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-// func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
-    
-//     if r.Method != http.MethodDelete {
-//         http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-//         return
-//     }
-        
-//         idStr := r.URL.Query().Get("id")
-//         if idStr == "" {
-//             http.Error(w, `{"error": "ID is required"}`, http.StatusBadRequest)
-//             return
-//         }
-    
-//         id, err := strconv.Atoi(idStr)
-//         if err != nil {
-//             http.Error(w, `{"error": "Invalid ID"}`, http.StatusBadRequest)
-//             return
-//         }
-    
-        
-//         found := false
-//         for i, b := range bootcamps {
-//             if b.ID == id {
-//                 bootcamps = append(bootcamps[:i], bootcamps[i+1:]...)
-//                 found = true
-//                 break
-//             }
-//         }
-    
-//         if !found {
-//             http.Error(w, `{"error": "Bootcamp not found"}`, http.StatusNotFound)
-//             return
-//         }
-    
-//         // Set JSON header
-//         w.Header().Set("Content-Type", "application/json")
-//         w.WriteHeader(http.StatusOK)
 
-//         if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp deleted successfully"}); err != nil {
-//             log.Printf("Error encoding response: %v", err)
-//         }
+func deletebootcampsHandler(w http.ResponseWriter, r *http.Request) {
+    
+    // Only allow Delete requests
+    if r.Method != http.MethodDelete {
+        http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+        return
+    }
+        // Extract 'id' from URL query parameters
+    idStr := r.URL.Query().Get("id")
+    if idStr == "" {
+        http.Error(w, `{"error": "ID is required"}`, http.StatusBadRequest)
+        return
+    }
+    
+// Convert 'id' from string to int
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, `{"error": "Invalid ID"}`, http.StatusBadRequest)
+        return
+    }
+    
         
-//     }
+    result, err := db.Exec("DELETE FROM bootcamp WHERE id = ?", id)
+    if err != nil {
+        http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
+        log.Printf("Delete error: %v", err)
+        return
+    }
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        http.Error(w, `{"error": "Could not determine result"}`, http.StatusInternalServerError)
+        return
+    }
+
+    if rowsAffected == 0 {
+        http.Error(w, `{"error": "Bootcamp not found"}`, http.StatusNotFound)
+        return
+    }
+    
+        // Set JSON header
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+
+        if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp deleted successfully"}); err != nil {
+            log.Printf("Error encoding response: %v", err)
+        }
+        
+    }
+
+
 //     func editbootcampsHandler(w http.ResponseWriter, r *http.Request) {
     
-        
 //         if r.Method != http.MethodPut {
 //             http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 //             return
