@@ -140,6 +140,12 @@ func newbootcampsHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+// Check that name is not empty
+if newBootcamp.Name == "" {
+    http.Error(w, `{"error": "Name is required"}`, http.StatusBadRequest)
+    return
+}
+
     // Insert new bootcamp into database
     result, err := db.Exec(
         "INSERT INTO bootcamp (name, description, category_id) VALUES (?, ?, ?)",
@@ -254,25 +260,19 @@ func editbootcampsHandler(w http.ResponseWriter, r *http.Request) {
             http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
             return
         }
+
+        // Check that name is not empty
+if update.Name == "" {
+    http.Error(w, `{"error": "Name is required"}`, http.StatusBadRequest)
+    return
+}
     
       // update bootcamp in the database
-    result, err := db.Exec(`UPDATE bootcamp SET name = ?, description = ?, category_id = ? WHERE id = ?`,
+    _ , err = db.Exec(`UPDATE bootcamp SET name = ?, description = ?, category_id = ? WHERE id = ?`,
     update.Name, update.Description, update.Category.ID, id)
 if err != nil {
     http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
     log.Printf("DB update error: %v", err)
-    return
-}
-
-// Check edit result and handle not found bootcamp
-rowsAffected, err := result.RowsAffected()
-if err != nil {
-    http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
-    log.Printf("DB rows affected error: %v", err)
-    return
-}
-if rowsAffected == 0 {
-    http.Error(w, `{"error": "Bootcamp not found"}`, http.StatusNotFound)
     return
 }
     
