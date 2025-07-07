@@ -1,4 +1,4 @@
-module test.com/test
+module github.com/melikadaryabak/bootcamp
 
 go 1.20
 
