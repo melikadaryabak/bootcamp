@@ -16,7 +16,8 @@ func NewBootcampSrvc(db *sql.DB) BootcampSrvc {
 
 func (b BootcampSrvc) GetBootcamps(ctx context.Context) []entity.Bootcamp {
 	bootcamps := []entity.Bootcamp{}
-	var bootcamps []Bootcamp
+
+	// var bootcamps []Bootcamp
 
     // Get bootcamps query 
     rows, err := db.Query(`
@@ -42,6 +43,6 @@ func (b BootcampSrvc) GetBootcamps(ctx context.Context) []entity.Bootcamp {
         }
         bootcamps = append(bootcamps, b)
     }
-	
+
 	return bootcamps
 }
