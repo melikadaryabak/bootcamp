@@ -21,7 +21,7 @@ func (b BootcampSrvc) GetBootcamps(ctx context.Context) []entity.Bootcamp {
 	// var bootcamps []Bootcamp
 
     // Get bootcamps query 
-    rows, err := db.Query(`
+    rows, err := b.db.Query(`
         SELECT b.id, b.name, b.description, c.id, c.name
         FROM bootcamp b
         JOIN category c ON b.category_id = c.id
