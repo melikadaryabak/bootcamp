@@ -3,7 +3,6 @@ package categorysrvc
 import (
 	"context"
 	"database/sql"
-
 	"github.com/melikadaryabak/bootcamp/internal/dto/entity"
 )
 
