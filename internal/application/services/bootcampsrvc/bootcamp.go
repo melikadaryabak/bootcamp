@@ -38,7 +38,12 @@ defer rows.Close()
  // Scan rows into bootcamps
     for rows.Next() {
         // var b Bootcamp
-        if err := rows.Scan(&b.ID, &b.Name, &b.Description, &b.Category.ID, &b.Category.Name); err != nil {
+        if err := rows.Scan(
+            &bootcamp.ID, &b.Name,
+            &bootcamp.Description,
+            &bootcamp.Category.ID,
+            &bootcamp.Category.Name
+           ); err != nil {
             log.Println("Scan error:", err)
   
             // defer rows.Close()
