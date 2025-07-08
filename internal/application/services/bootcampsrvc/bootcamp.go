@@ -53,5 +53,5 @@ defer rows.Close()
         bootcamps = append(bootcamps, b)
     }
 
-	return bootcamps
+	return bootcamps,nil
 }
