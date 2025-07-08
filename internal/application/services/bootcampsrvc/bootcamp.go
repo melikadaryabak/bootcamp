@@ -16,7 +16,7 @@ func NewBootcampSrvc(db *sql.DB) BootcampSrvc {
 	return BootcampSrvc{db: db}
 }
 
-func (b BootcampSrvc) GetBootcamps(ctx context.Context) ([]entity.Bootcamp,err) {
+func (b BootcampSrvc) GetBootcamps(ctx context.Context) ([]entity.Bootcamp, error) {
 	bootcamps := []entity.Bootcamp{}
 
 	// var bootcamps []Bootcamp
@@ -39,9 +39,10 @@ defer rows.Close()
     for rows.Next() {
         // var b Bootcamp
         if err := rows.Scan(&b.ID, &b.Name, &b.Description, &b.Category.ID, &b.Category.Name); err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
+            log.Println("Scan error:", err)
+  
             // defer rows.Close()
-            return
+            return nil,err
         }
         bootcamps = append(bootcamps, b)
     }
