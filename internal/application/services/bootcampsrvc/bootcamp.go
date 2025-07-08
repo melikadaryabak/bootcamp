@@ -1,10 +1,11 @@
 package bootcampsrvc
 
 import (
+    "log"
 	"context"
 	"database/sql"
+    "net/http"
 	"github.com/melikadaryabak/bootcamp/internal/dto/entity"
-	"net/http"
 )
 
 type BootcampSrvc struct {
@@ -15,7 +16,7 @@ func NewBootcampSrvc(db *sql.DB) BootcampSrvc {
 	return BootcampSrvc{db: db}
 }
 
-func (b BootcampSrvc) GetBootcamps(ctx context.Context) []entity.Bootcamp {
+func (b BootcampSrvc) GetBootcamps(ctx context.Context) ([]entity.Bootcamp,err) {
 	bootcamps := []entity.Bootcamp{}
 
 	// var bootcamps []Bootcamp
@@ -29,17 +30,17 @@ func (b BootcampSrvc) GetBootcamps(ctx context.Context) []entity.Bootcamp {
 
    // Handle database query error
    if err != nil {
-    http.Error(w, `{"error": "Failed to query bootcamps"}`, http.StatusInternalServerError)
+    // http.Error(w, `{"error": "Failed to query bootcamps"}`, http.StatusInternalServerError)
     log.Println("Query error:", err)
-    return
+    return nil ,err
 }
-    
+defer rows.Close()
  // Scan rows into bootcamps
     for rows.Next() {
-        var b Bootcamp
+        // var b Bootcamp
         if err := rows.Scan(&b.ID, &b.Name, &b.Description, &b.Category.ID, &b.Category.Name); err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
-            defer rows.Close()
+            // defer rows.Close()
             return
         }
         bootcamps = append(bootcamps, b)
