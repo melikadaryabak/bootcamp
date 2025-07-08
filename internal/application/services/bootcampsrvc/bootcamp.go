@@ -4,7 +4,7 @@ import (
     "log"
 	"context"
 	"database/sql"
-    "net/http"
+    // _"net/http"
 	"github.com/melikadaryabak/bootcamp/internal/dto/entity"
 )
 
@@ -37,12 +37,13 @@ func (b BootcampSrvc) GetBootcamps(ctx context.Context) ([]entity.Bootcamp, erro
 defer rows.Close()
  // Scan rows into bootcamps
     for rows.Next() {
+        var b entity.Bootcamp
         // var b Bootcamp
         if err := rows.Scan(
-            &bootcamp.ID, &b.Name,
-            &bootcamp.Description,
-            &bootcamp.Category.ID,
-            &bootcamp.Category.Name
+            &b.ID, &b.Name,
+            &b.Description,
+            &b.Category.ID,
+            &b.Category.Name
            ); err != nil {
             log.Println("Scan error:", err)
   
