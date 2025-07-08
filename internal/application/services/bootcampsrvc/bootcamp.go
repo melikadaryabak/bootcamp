@@ -43,7 +43,7 @@ defer rows.Close()
             &b.ID, &b.Name,
             &b.Description,
             &b.Category.ID,
-            &b.Category.Name
+            &b.Category.Name,
            ); err != nil {
             log.Println("Scan error:", err)
   
