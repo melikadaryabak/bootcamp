@@ -34,6 +34,7 @@ func (b BootcampSrvc) GetBootcamps(ctx context.Context) ([]entity.Bootcamp, erro
     log.Println("Query error:", err)
     return nil ,err
 }
+
 defer rows.Close()
  // Scan rows into bootcamps
     for rows.Next() {
@@ -54,4 +55,28 @@ defer rows.Close()
     }
 
 	return bootcamps,nil
+}
+
+
+func (b BootcampSrvc) PostBootcamp(ctx context.Context, bootcamp entity.Bootcamp) (int64, error) {
+
+    // Post bootcamps query 
+    query :=(`
+    INSERT INTO bootcamp (name, description, category_id)
+    VALUES (?, ?, ?)
+    `)
+
+   // Handle database query error
+   result, err := b.db.ExecContext(ctx, query, bootcamp.Name, bootcamp.Description, bootcamp.Category.ID)
+   if err != nil {
+    log.Println("Query error:", err)
+    return 0 ,err
+}
+insertedID, err := result.LastInsertId()
+	if err != nil {
+		log.Println("Failed to fetch last insert ID:", err)
+		return 0 , err
+	}
+
+	return insertedID ,nil
 }
