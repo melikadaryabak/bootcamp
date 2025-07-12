@@ -80,3 +80,50 @@ insertedID, err := result.LastInsertId()
 
 	return insertedID ,nil
 }
+
+
+func (b BootcampSrvc) DeleteBootcamp(ctx context.Context,id int64) (bool, error) {
+
+    // Get bootcamps query 
+    query := (`
+    DELETE FROM bootcamp WHERE id = ?
+    `)
+
+   // Handle database query error
+   result, err := b.db.ExecContext(ctx, query,id)
+   if err != nil {
+    log.Println("Query error:", err)
+    return false ,err
+}
+
+rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Failed to get affected rows:", err)
+		return false, err
+	}
+
+	if rowsAffected == 0 {
+		return false, nil
+	}
+
+	return true,nil
+}
+
+
+func (b BootcampSrvc) PutBootcamp(ctx context.Context,bootcamp entity.Bootcamp) (bool, error) {
+
+    // Get bootcamps query 
+    query := (`
+    UPDATE bootcamp
+    SET name = ?, description = ?, category_id = ?
+    WHERE id = ?
+    `)
+
+   // Handle database query error
+   result, err := b.db.ExecContext(ctx, query, bootcamp.Name, bootcamp.Description, bootcamp.Category.ID, bootcamp.ID)
+   if err != nil {
+    log.Println("Query error:", err)
+    return false ,err
+}
+	return true,nil
+}
