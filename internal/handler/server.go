@@ -67,7 +67,7 @@ func (s Server) GetBootcamps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// bootcamps := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
+	bootcamps := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
 
 	// Set JSON header
 	w.Header().Set("Content-Type", "application/json")
@@ -85,14 +85,14 @@ func (s Server) PostBootcamp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// bootcamps := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
+	bootcamp := s.srvc.BootcampSrvc.PostBootcamps(r.Context())
 
 	// Set JSON header
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	// Encode bootcamps to JSON
-	if err := json.NewEncoder(w).Encode(PostBootcamp); err != nil {
+	if err := json.NewEncoder(w).Encode(bootcamp); err != nil {
         log.Printf("Error encoding response: %v", err)
     }
 }
