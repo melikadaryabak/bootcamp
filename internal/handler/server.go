@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"fmt"
 	"github.com/melikadaryabak/bootcamp/internal/application/services"
 )
 
@@ -49,7 +50,10 @@ func (s Server) GetCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categories := s.srvc.CategorySrvc.GetCategories(r.Context())
+	categories , err := s.srvc.CategorySrvc.GetCategories(r.Context())
+	if err != nil{
+	  http.Error(w, fmt.Sprintf("error for get Categories: %w" , err), http.StatusInternalServerError)
+	}
 
 	// Set JSON header
 	w.Header().Set("Content-Type", "application/json")
@@ -66,8 +70,11 @@ func (s Server) GetBootcamps(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	bootcamps := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
+	
+	bootcamps , err := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
+	if err != nil{
+	  http.Error(w, fmt.Sprintf("error for get bootcamps: %w" , err), http.StatusInternalServerError)
+	}
 
 	// Set JSON header
 	w.Header().Set("Content-Type", "application/json")
@@ -84,8 +91,18 @@ func (s Server) PostBootcamp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	// Decode request body into Bootcamp struct
+    var bootcamp entity.Bootcamp
+    decoder := json.NewDecoder(r.Body)
+    if err := decoder.Decode(&bootcamp); err != nil {
+        http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
+        return
+    }
 
-	bootcamp := s.srvc.BootcampSrvc.PostBootcamps(r.Context())
+	bootcamp , err := s.srvc.BootcampSrvc.PostBootcamp(r.Context())
+	if err != nil{
+	  http.Error(w, fmt.Sprintf("error fo add bootcamps: %w" , err), http.StatusInternalServerError)
+	}
 
 	// Set JSON header
 	w.Header().Set("Content-Type", "application/json")
