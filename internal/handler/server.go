@@ -92,7 +92,7 @@ func (s Server) PostBootcamp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	// Encode bootcamps to JSON
-	if err := json.NewEncoder(w).Encode(newBootcamp); err != nil {
+	if err := json.NewEncoder(w).Encode(PostBootcamp); err != nil {
         log.Printf("Error encoding response: %v", err)
     }
 }
