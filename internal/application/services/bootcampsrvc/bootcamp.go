@@ -120,7 +120,7 @@ func (b BootcampSrvc) PutBootcamp(ctx context.Context,bootcamp entity.Bootcamp) 
     `)
 
    // Handle database query error
-   result, err := b.db.ExecContext(ctx, query, bootcamp.Name, bootcamp.Description, bootcamp.Category.ID, bootcamp.ID)
+   _ , err := b.db.ExecContext(ctx, query, bootcamp.Name, bootcamp.Description, bootcamp.Category.ID, bootcamp.ID)
    if err != nil {
     log.Println("Query error:", err)
     return false ,err
