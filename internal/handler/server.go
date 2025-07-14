@@ -102,6 +102,7 @@ func (s Server) PostBootcamp(w http.ResponseWriter, r *http.Request) {
 	bootcampId , err := s.srvc.BootcampSrvc.PostBootcamp(r.Context(),bootcamp)
 	if err != nil{
 	  http.Error(w, fmt.Sprintf("error fo add bootcamps: %w" , err), http.StatusInternalServerError)
+	  return
 	}
 
 	// Set JSON header
