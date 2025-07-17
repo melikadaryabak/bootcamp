@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"fmt"
 	"github.com/melikadaryabak/bootcamp/internal/application/services"
+	"github.com/melikadaryabak/bootcamp/internal/dto/entity"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Server struct {
@@ -32,6 +35,10 @@ func NewServer(port string, srvc services.Services) error {
 			server.GetBootcamps(w, r)
 		case http.MethodPost:
 			server.PostBootcamp(w, r)
+		case http.MethodDelete :
+			server.DeleteBootcamp(w, r)
+		case http.MethodPut :
+			server.PutBootcamp(w, r)
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
@@ -74,6 +81,7 @@ func (s Server) GetBootcamps(w http.ResponseWriter, r *http.Request) {
 	bootcamps , err := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
 	if err != nil{
 	  http.Error(w, fmt.Sprintf("error for get bootcamps: %w" , err), http.StatusInternalServerError)
+	  return
 	}
 
 	// Set JSON header
@@ -98,19 +106,104 @@ func (s Server) PostBootcamp(w http.ResponseWriter, r *http.Request) {
         http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
         return
     }
+	defer r.Body.Close()
 
 	bootcampId , err := s.srvc.BootcampSrvc.PostBootcamp(r.Context(),bootcamp)
 	if err != nil{
-	  http.Error(w, fmt.Sprintf("error fo add bootcamps: %w" , err), http.StatusInternalServerError)
+	  http.Error(w, fmt.Sprintf("error for add bootcamps: %w" , err), http.StatusInternalServerError)
 	  return
 	}
 
 	// Set JSON header
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 
 	// Encode bootcamps to JSON
-	if err := json.NewEncoder(w).Encode(bootcamp); err != nil {
+	if err := json.NewEncoder(w).Encode(bootcampId); err != nil {
         log.Printf("Error encoding response: %v", err)
     }
+}
+
+
+func (s Server) DeleteBootcamp(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "Missing id", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid id", http.StatusBadRequest)
+		return
+	}
+
+	idInt64 := int64(id)
+
+	success, err := s.srvc.BootcampSrvc.DeleteBootcamp(r.Context(), idInt64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error deleting bootcamp: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if !success {
+		http.Error(w, "Bootcamp not found", http.StatusNotFound)
+		return
+	}
+
+	 // Set JSON header
+	 w.Header().Set("Content-Type", "application/json")
+	 w.WriteHeader(http.StatusOK)
+
+	// Send success response after deletion
+	 if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp deleted successfully"}); err != nil {
+		 log.Printf("Error encoding response: %v", err)
+	 }
+}
+
+
+func (s Server) PutBootcamp(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	// Decode request body into Bootcamp struct
+    var bootcamp entity.Bootcamp
+    decoder := json.NewDecoder(r.Body)
+    if err := decoder.Decode(&bootcamp); err != nil {
+        http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
+        return
+    }
+	defer r.Body.Close()
+
+	
+	if bootcamp.ID == 0 {
+		http.Error(w, "Missing bootcamp ID", http.StatusBadRequest)
+		return
+	}
+
+	success, err := s.srvc.BootcampSrvc.PutBootcamp(r.Context(), bootcamp)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error updating bootcamp: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if !success {
+		http.Error(w, "Bootcamp not found", http.StatusNotFound)
+		return
+	}
+
+	 // Set JSON header
+	 w.Header().Set("Content-Type", "application/json")
+	 w.WriteHeader(http.StatusOK)
+ 
+	 //Encode updated bootcamp to JSON
+	 if err := json.NewEncoder(w).Encode(map[string]string{"message": "Bootcamp edit successfully"}); err != nil {
+		 log.Printf("Error encoding response: %v", err)
+	 }
 }

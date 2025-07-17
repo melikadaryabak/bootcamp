@@ -97,31 +97,17 @@
             list.innerHTML = '';
 
             data.bootcamps.forEach(b => {
-                if (!b || !b.category) return;
-
                 const div = document.createElement('div');
                 div.className = 'bootcamp';
-
-                const title = document.createElement('h3');
-                title.textContent = b.name?.trim() || 'بدون عنوان';
-
-                const desc = document.createElement('p');
-                desc.textContent = b.description?.trim() || 'بدون توضیح';
-
-                const cat = document.createElement('p');
-                cat.innerHTML = `<strong>Category:</strong> ${b.category.name || 'نامشخص'}`;
-
-                const actions = document.createElement('div');
-                actions.className = 'actions';
-                actions.innerHTML = `
-                    <button onclick="editBootcamp(${b.id}, '${b.name}', '${b.description}', ${b.category.id})">Edit</button>
-                    <button onclick="deleteBootcamp(${b.id})">Delete</button>
+                div.innerHTML = `
+                    <h3>${b.name}</h3>
+                    <p>${b.description}</p>
+                    <p><strong>Category:</strong> ${b.category.name}</p>
+                    <div class="actions">
+                        <button onclick="editBootcamp(${b.id}, '${b.name}', '${b.description}', ${b.category.id})">Edit</button>
+                        <button onclick="deleteBootcamp(${b.id})">Delete</button>
+                    </div>
                 `;
-
-                div.appendChild(title);
-                div.appendChild(desc);
-                div.appendChild(cat);
-                div.appendChild(actions);
                 list.appendChild(div);
             });
         }
@@ -133,7 +119,7 @@
             const categoryName = document.getElementById('category').options[document.getElementById('category').selectedIndex].text;
 
             const newBootcamp = {
-                id: 0,
+                id: 0, 
                 name,
                 description,
                 category: {
@@ -144,7 +130,7 @@
 
             await fetch('/bootcamps', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(newBootcamp)
             });
 
@@ -187,7 +173,7 @@
 
             await fetch(`/bootcamps?id=${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(updatedBootcamp)
             });
 
@@ -199,6 +185,7 @@
             document.getElementById('editModal').style.display = 'none';
         }
 
+        // Initial load
         fetchBootcamps();
     </script>
 </body>
