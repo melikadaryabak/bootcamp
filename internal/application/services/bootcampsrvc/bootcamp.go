@@ -103,6 +103,7 @@ rowsAffected, err := result.RowsAffected()
 	}
 
 	if rowsAffected == 0 {
+        log.Printf("No bootcamp found with id: %d", id)
 		return false, nil
 	}
 
