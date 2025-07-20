@@ -183,14 +183,14 @@ func (s Server) DeleteBootcamp(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	success , err := s.srvc.BootcampSrvc.DeleteBootcamp(r.Context(),idInt64)
+	bootcampDeleted , err := s.srvc.BootcampSrvc.DeleteBootcamp(r.Context(),idInt64)
 	if err != nil {
 		log.Printf("error deleting bootcamp: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	if !success {
+	if !bootcampDeleted {
 		http.Error(w, "Bootcamp not found", http.StatusNotFound)
 		return
 	}
@@ -237,15 +237,10 @@ if bootcamp.Name == "" {
 	// 	return
 	// }
 
-	success , err := s.srvc.BootcampSrvc.PutBootcamp(r.Context(),bootcamp)
+	_ , err := s.srvc.BootcampSrvc.PutBootcamp(r.Context(),bootcamp)
 	if err != nil {
 		log.Printf("error updating bootcamp: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	if !success {
-		http.Error(w, "Bootcamp not found", http.StatusNotFound)
 		return
 	}
 
