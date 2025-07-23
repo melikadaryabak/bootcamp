@@ -97,11 +97,12 @@ func bootcampsHandler(w http.ResponseWriter, r *http.Request) {
 }
     
  // Scan rows into bootcamps
+ defer rows.Close()
     for rows.Next() {
         var b Bootcamp
         if err := rows.Scan(&b.ID, &b.Name, &b.Description, &b.Category.ID, &b.Category.Name); err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
-            defer rows.Close()
+           
             return
         }
         bootcamps = append(bootcamps, b)

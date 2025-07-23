@@ -60,11 +60,6 @@ func (s Server) GetCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// categories , err := s.srvc.CategorySrvc.GetCategories(r.Context())
-	// if err != nil{
-	//   http.Error(w, fmt.Sprintf("error for get Categories: %w" , err), http.StatusInternalServerError)
-	// }
-
 	categories , err := s.srvc.CategorySrvc.GetCategories(r.Context())
 	if err != nil {
 		log.Printf("error getting categories: %v", err)
@@ -88,12 +83,6 @@ func (s Server) GetBootcamps(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
-	// bootcamps , err := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
-	// if err != nil{
-	//   http.Error(w, fmt.Sprintf("error for get bootcamps: %w" , err), http.StatusInternalServerError)
-	//   return
-	// }
 
 	bootcamps , err := s.srvc.BootcampSrvc.GetBootcamps(r.Context())
 	if err != nil {
@@ -133,12 +122,6 @@ if bootcamp.Name == "" {
     return
 }
 
-	// bootcampId , err := s.srvc.BootcampSrvc.PostBootcamp(r.Context(),bootcamp)
-	// if err != nil{
-	//   http.Error(w, fmt.Sprintf("error for add bootcamps: %w" , err), http.StatusInternalServerError)
-	//   return
-	// }
-
 	insertedID , err := s.srvc.BootcampSrvc.PostBootcamp(r.Context(),bootcamp)
 	if err != nil {
 		log.Printf("error for add bootcamp: %v", err)
@@ -176,12 +159,6 @@ func (s Server) DeleteBootcamp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	idInt64 := int64(id)
-
-	// success, err := s.srvc.BootcampSrvc.DeleteBootcamp(r.Context(), idInt64)
-	// if err != nil {
-	// 	http.Error(w, fmt.Sprintf("Error deleting bootcamp: %v", err), http.StatusInternalServerError)
-	// 	return
-	// }
 
 	bootcampDeleted , err := s.srvc.BootcampSrvc.DeleteBootcamp(r.Context(),idInt64)
 	if err != nil {
@@ -230,12 +207,6 @@ if bootcamp.Name == "" {
 		http.Error(w, "Missing bootcamp ID", http.StatusBadRequest)
 		return
 	}
-
-	// success, err := s.srvc.BootcampSrvc.PutBootcamp(r.Context(), bootcamp)
-	// if err != nil {
-	// 	http.Error(w, fmt.Sprintf("Error updating bootcamp: %v", err), http.StatusInternalServerError)
-	// 	return
-	// }
 
 	_ , err := s.srvc.BootcampSrvc.PutBootcamp(r.Context(),bootcamp)
 	if err != nil {
