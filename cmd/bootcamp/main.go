@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/melikadaryabak/bootcamp/internal/application/services"
 	"github.com/melikadaryabak/bootcamp/internal/handler"
+	repopkg "github.com/melikadaryabak/bootcamp/internal/infrastructure/db"
 )
 
 func main() {
@@ -31,9 +32,8 @@ func main() {
 	// if err != nil {
 	// 	log.Fatalf("Error opening database connection: %v", err)
 	// }
-
-
-	srvc := services.NewServices(db)
+	repo := repopkg.NewBootcampRepo(db)       //new code
+	srvc := services.NewServices(repo)
 
 	err = handler.NewServer("8080", srvc)
 	if err != nil {

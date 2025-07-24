@@ -1,9 +1,10 @@
 package services
 
 import (
-	"database/sql"
+	// "database/sql"
 	"github.com/melikadaryabak/bootcamp/internal/application/services/categorysrvc"
 	"github.com/melikadaryabak/bootcamp/internal/application/services/bootcampsrvc"
+	"github.com/melikadaryabak/bootcamp/internal/infrastructure/db"
 )
 
 type Services struct {
@@ -11,9 +12,9 @@ type Services struct {
 	BootcampSrvc bootcampsrvc.BootcampSrvc
 }
 
-func NewServices(db *sql.DB) Services {
-	return Services{
-		CategorySrvc: categorysrvc.NewCategorySrvc(db),
-		BootcampSrvc: bootcampsrvc.NewBootcampSrvc(db),
+func NewServices(repo *db.BootcampRepo) *Services {
+	return &Services{
+		// CategorySrvc: categorysrvc.NewCategorySrvc(repo),
+		BootcampSrvc: bootcampsrvc.NewBootcampSrvc(repo),
 	}
 }

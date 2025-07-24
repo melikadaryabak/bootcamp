@@ -10,13 +10,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-
 type Server struct {
-	srvc services.Services
+	srvc *services.Services
 }
 
-
-func NewServer(port string, srvc services.Services) error {
+func NewServer(port string, srvc *services.Services) error {
 
 	server := Server{
 		srvc: srvc,
@@ -53,7 +51,6 @@ func NewServer(port string, srvc services.Services) error {
 	return nil
 }
 
-
 func (s Server) GetCategories(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -77,7 +74,6 @@ func (s Server) GetCategories(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func (s Server) GetBootcamps(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -100,7 +96,6 @@ func (s Server) GetBootcamps(w http.ResponseWriter, r *http.Request) {
         log.Printf("Error encoding response: %v", err)
     }
 }
-
 
 func (s Server) PostBootcamp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -138,7 +133,6 @@ if bootcamp.Name == "" {
         log.Printf("Error encoding response: %v", err)
     }
 }
-
 
 func (s Server) DeleteBootcamp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
@@ -181,7 +175,6 @@ func (s Server) DeleteBootcamp(w http.ResponseWriter, r *http.Request) {
 		 log.Printf("Error encoding response: %v", err)
 	 }
 }
-
 
 func (s Server) PutBootcamp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {

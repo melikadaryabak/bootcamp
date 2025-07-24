@@ -24,9 +24,10 @@ func (r *BootcampRepo) GetBootcamps(ctx context.Context) ([]entity.Bootcamp, err
         FROM bootcamp b
         JOIN category c ON b.category_id = c.id
     `)
-	if err != nil {
-		return nil, err
-	}
+if err != nil {
+	log.Println("Failed to query bootcamps:", err)
+	return nil, err
+}
 
 	//Scan rows into bootcamps
 	defer rows.Close()
@@ -65,13 +66,16 @@ func (r *BootcampRepo) PostBootcamps(ctx context.Context, b entity.Bootcamp) (in
 	return insertedID ,nil
 }
 
-
 func (r *BootcampRepo) DeleteBootcamps(ctx context.Context,id int64) (bool, error) {
 
 	// Get bootcamps query 
 	result, err := r.db.ExecContext(ctx,`
     DELETE FROM bootcamp WHERE id = ?
 	`,id)
+	if err != nil {
+		log.Println("Query error:", err)
+		return false, err
+	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
@@ -101,5 +105,6 @@ func (r *BootcampRepo) PutBootcamps(ctx context.Context,bootcamp entity.Bootcamp
 		log.Println("Failed to execute update:", err)
 		return false, err
 	}
+
 	return true, nil
 }
