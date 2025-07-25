@@ -4,17 +4,17 @@ import (
 	// "database/sql"
 	"github.com/melikadaryabak/bootcamp/internal/application/services/categorysrvc"
 	"github.com/melikadaryabak/bootcamp/internal/application/services/bootcampsrvc"
-	"github.com/melikadaryabak/bootcamp/internal/infrastructure/db"
+	repopkg "github.com/melikadaryabak/bootcamp/internal/infrastructure/db"
 )
 
 type Services struct {
-	CategorySrvc categorysrvc.CategorySrvc
-	BootcampSrvc bootcampsrvc.BootcampSrvc
+	CategorySrvc *categorysrvc.CategorySrvc
+	BootcampSrvc *bootcampsrvc.BootcampSrvc
 }
 
-func NewServices(repo *db.BootcampRepo) *Services {
+func NewServices(repo *repopkg.Repository) *Services {
 	return &Services{
-		// CategorySrvc: categorysrvc.NewCategorySrvc(repo),
-		BootcampSrvc: bootcampsrvc.NewBootcampSrvc(repo),
+		CategorySrvc: categorysrvc.NewCategorySrvc(repo.CategoryRepo),
+		BootcampSrvc: bootcampsrvc.NewBootcampSrvc(repo.BootcampRepo),
 	}
 }

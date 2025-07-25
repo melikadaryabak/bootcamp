@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	 
    // Static file handler
    http.Handle("/", http.FileServer(http.Dir("./static")))
@@ -28,11 +27,9 @@ func main() {
 		log.Fatalf("Error pinging database: %v", err)
 	}
 
-	// // Check database connection
-	// if err != nil {
-	// 	log.Fatalf("Error opening database connection: %v", err)
-	// }
-	repo := repopkg.NewBootcampRepo(db)       //new code
+	defer db.Close()
+
+	repo := repopkg.NewRepository(db)       
 	srvc := services.NewServices(repo)
 
 	err = handler.NewServer("8080", srvc)

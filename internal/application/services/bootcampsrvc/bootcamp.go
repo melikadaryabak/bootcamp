@@ -10,16 +10,11 @@ import (
 )
 
 type BootcampSrvc struct {
-	// db *sql.DB
     repo *db.BootcampRepo
 }
 
-// func NewBootcampSrvc(db *sql.DB) BootcampSrvc {
-// 	return BootcampSrvc{db: db}
-// }
-
-func NewBootcampSrvc(repo *db.BootcampRepo) BootcampSrvc {
-	return BootcampSrvc{repo: repo}
+func NewBootcampSrvc(repo *db.BootcampRepo) *BootcampSrvc {
+	return &BootcampSrvc{repo: repo}
 }
 
 func (b BootcampSrvc) GetBootcamps(ctx context.Context) ([]entity.Bootcamp, error) {
